@@ -55,18 +55,22 @@ id, medium_id, component_id, instruction_id, amount, unit, ref_medium_id, ref_ty
 ```
 
 ---
-
 ## Medium Types
 
-Exploration revealed four distinct medium structures:
+Exploration revealed five distinct medium structures based on how `tex_text` begins:
 
 | Type | Count | Description |
 |------|-------|-------------|
-| standard | 964 | Base components followed by preparation instructions |
-| reference | 175 | Modifications of another medium (Use/Prepare Medium No. X) |
-| solution | 60 | Organised into separate solutions (A, B, C) with no base components |
-| unique | 2 | One-of-a-kind structures (biological source, single instruction) |
+| standard | 954 | Starts with `\mono` — base components followed by instructions |
+| reference | 175 | Starts with `\chu` — modifications of another medium (Use/Prepare Medium No. X) |
+| solution | 60 | Starts with `\chu{Solution}` — organised into lettered (A, B, C) or numbered (1, 2, 3) solutions |
+| plain reference | 10 | No LaTeX tag — reference text missing `\chu{}` wrapper |
+| unique | 2 | Biological source (Vero E6) or single instruction (Distilled water) |
+| **Total** | **1165** | |
 
+> **Note:** 36 mediums overlap between reference and solution categories.
+> The 201 mediums that start with `\chu` break down as:
+> 175 reference + 60 solution
 ---
 
 ## Notebook Pipeline
