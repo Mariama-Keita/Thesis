@@ -4,7 +4,7 @@
 
 This project transforms a dataset of **1165 microbial growth mediums** from a raw LaTeX-formatted source into a structured relational database. The goal is to make the data queryable, analysable, and ready for ontology development.
 
-Each medium in the dataset describes a recipe for growing a specific microorganism — listing the chemical and biological components, their quantities, and the preparation instructions.
+Each medium in the dataset describes a recipe for growing a specific microorganism - listing the chemical and biological components, their quantities, and the preparation instructions.
 
 ---
 
@@ -14,13 +14,13 @@ Each medium has three fields:
 
 | Field | Description |
 |-------|-------------|
-| `grmd` | Unique medium number — primary key |
+| `grmd` | Unique medium number - primary key |
 | `md_name` | Medium name |
 | `tex_text` | Raw LaTeX content containing components and preparation instructions |
 
 The `tex_text` uses two main LaTeX constructs:
-- `\mono{component} {amount} {unit}` — an ingredient with its quantity
-- `\chu{...}` — a preparation instruction
+- `\mono{component} {amount} {unit}` - an ingredient with its quantity
+- `\chu{...}` - a preparation instruction
 
 Data is **not included** in this repository as it contains sensitive information.
 
@@ -31,13 +31,13 @@ Data is **not included** in this repository as it contains sensitive information
 The raw data is parsed into four relational tables:
 
 ### Medium
-The fact table — one row per medium.
+The fact table - one row per medium.
 ```
 id, name, type
 ```
 
 ### Component
-All unique chemical and biological substances across all mediums. A component exists independently of any medium — `KH₂PO₄` is stored once and referenced by any medium that uses it.
+All unique chemical and biological substances across all mediums. A component exists independently of any medium - `KH₂PO₄` is stored once and referenced by any medium that uses it.
 ```
 id, name
 ```
@@ -74,24 +74,24 @@ Exploration revealed four distinct medium structures:
 ```
 medium.csv (raw)
       ↓
-01_exploration.ipynb   → understanding the data structure and quality
+01_exploration.ipynb   --> understanding the data structure and quality
       ↓
-02_cleaning.ipynb      → normalizing LaTeX, fixing dirty data → clean_medium.csv
+02_cleaning.ipynb      --> normalizing LaTeX, fixing dirty data --> clean_medium.csv
       ↓
-03_parsing.ipynb       → parsing into 4 tables → medium.db (SQLite)
+03_parsing.ipynb       --> parsing into 4 tables --> medium.db (SQLite)
 ```
 
 ---
 
 ## Documentation
 
-Detailed exploration findings are in `docs/01_exploration.md` — covering all data quality issues found, LaTeX tag meanings, medium type classification, dirty data catalogue, and design decisions.
+Detailed exploration findings are in `docs/01_exploration.md` - covering all data quality issues found, LaTeX tag meanings, medium type classification, dirty data catalogue, and design decisions.
 
 ---
 
 ## Future Direction
 
 - Chemical vs biological component classification
-- Ontology development (OWL/RDF) from the relational model
-- Cross-reference resolution — building the full ingredient tree of any medium by following references recursively
+- Ontology development (RDF) from the relational model
+- Cross-reference resolution - building the full ingredient tree of any medium by following references recursively
 - Analysis of which components co-occur across mediums
