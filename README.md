@@ -73,11 +73,11 @@ Exploration revealed four distinct medium structures:
 
 ```
 medium.csv (raw)
-      ↓
+      |
 01_exploration.ipynb   --> understanding the data structure and quality
-      ↓
+      |
 02_cleaning.ipynb      --> normalizing LaTeX, fixing dirty data --> clean_medium.csv
-      ↓
+      |
 03_parsing.ipynb       --> parsing into 4 tables --> medium.db (SQLite)
 ```
 
