@@ -57,7 +57,43 @@ ingredient_df = ingredient_df.sort_values(
 ingredient_df.to_csv("ingredient_frequency.csv", index=False)
 
 print(ingredient_df)
+import pandas as pd
+import re
+from collections import Counter
 
+df = pd.read_csv("JCM_mediumID_mediumName (1).csv")
+
+solution_counter = Counter()
+
+pattern = r'\\mono\{([^{}]*solution[^{}]*)\}'
+
+for text in df["tex_text"].fillna(""):
+
+    solutions = re.findall(
+        pattern,
+        text,
+        flags=re.IGNORECASE
+    )
+
+    for solution in solutions:
+        solution_counter[solution.strip()] += 1
+
+solution_df = pd.DataFrame(
+    solution_counter.items(),
+    columns=["Solution", "Count"]
+)
+
+solution_df = solution_df.sort_values(
+    by="Count",
+    ascending=False
+)
+
+solution_df.to_csv(
+    "solution_statistics.csv",
+    index=False
+)
+
+print(solution_df.head(30))
 
 
 
