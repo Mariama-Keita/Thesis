@@ -95,6 +95,31 @@ solution_df.to_csv(
 
 print(solution_df.head(30))
 
+unknown_counter = Counter()
+
+known = r'\\mono|\\chu'
+
+for text in df["tex_text"].fillna(""):
+
+    commands = re.findall(r'\\[A-Za-z]+', text)
+
+    for cmd in commands:
+
+        if not re.match(known, cmd):
+            unknown_counter[cmd] += 1
+
+unknown_df = pd.DataFrame(
+    unknown_counter.items(),
+    columns=["Unknown Command", "Count"]
+)
+
+unknown_df = unknown_df.sort_values(
+    by="Count",
+    ascending=False
+)
+
+print(unknown_df)
+
 
 
 
