@@ -11,7 +11,9 @@ every `\mono` and `\chu` line individually parseable. Whole-file brace balance
 is explicitly *not* a target — see [What we did not fix](#what-we-did-not-fix).
 
 **Input:** `data/medium.csv` (1165 rows, raw)
+
 **Output:** `data/medium_clean.csv` (1165 rows, `tex_text_clean` column)
+
 **Code:** `code/cleaning.py`
 
 ---
