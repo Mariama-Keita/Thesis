@@ -49,7 +49,7 @@ def split_mono(line):
 ```
 
 A line is *readable* if `split_mono` returns a complete `(name, amount, unit)`
-triple. All 12,900+ `\mono` lines are readable.
+triple. All 12931 `\mono` lines are readable.
 
 > **Why this matters.** An earlier version of this check used a flat regex
 > `\\mono\{[^}]+\}\s*\{[^}]+\}\s*\{[^}]*\}`. Because `[^}]+` cannot cross a
