@@ -67,6 +67,8 @@ RE_PLAIN_REFERENCE = re.compile(
 
 RE_HTML_ENTITY = re.compile(r"&#(\d+);")
 
+RE_PREFIX_BRACES = re.compile(r"\{\{([^}]+)\}") #JUST ADDED 
+
 
 
 # ---------------------------------------------------------------------------
@@ -326,7 +328,17 @@ def pass4_amount_without_unit(tex_text: Any, default_unit: str = "g") -> str:
     tex_text = _safe_text(tex_text)
     return RE_AMOUNT_NO_UNIT.sub(r"\1{" + default_unit + "}", tex_text)
 
+def pass4_prefix_braces(tex_text: Any) -> str:
+    r"""Remove extra braces around prefixes inside \mono ingredient names.
 
+    Examples:
+        {{p}-Aminobenzoic acid  -> {p-Aminobenzoic acid
+        {{iso}-Butyric acid     -> {iso-Butyric acid
+        {{N}-Acetyl...          -> {N-Acetyl...
+    """
+    tex_text = _safe_text(tex_text)
+
+    return RE_PREFIX_BRACES.sub(r"{\1", tex_text)
 # ---------------------------------------------------------------------------
 # Pass 5 — plain references
 # ---------------------------------------------------------------------------
@@ -386,6 +398,7 @@ PIPELINE = [
     pass4_brace_and_amount_repairs,
     pass4_broken_mono_tag,
     pass4_amount_without_unit,
+    pass4_prefix_braces, #newly added 
     pass5_plain_references,
 ]
 
