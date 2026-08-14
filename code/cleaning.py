@@ -67,7 +67,8 @@ RE_PLAIN_REFERENCE = re.compile(
 
 RE_HTML_ENTITY = re.compile(r"&#(\d+);")
 
-RE_PREFIX_BRACES = re.compile(r"\{\{([^}]+)\}") #JUST ADDED 
+RE_PREFIX_BRACES = re.compile(r"\{\{([^}]+)\}") #JUST ADDED
+RE_EMPTY_CHU = re.compile(r"\\chu\{\s*\}") # JUST ADDED 2
 
 
 
@@ -358,7 +359,34 @@ def pass5_plain_references(tex_text: Any) -> str:
 
     return tex_text
 
+# ---------------------------------------------------------------------------
+# Pass 6 — Removal of empty \chu{} tags
+# ---------------------------------------------------------------------------
 
+def pass6_remove_empty_chu(tex_text: Any) -> str:
+    """Remove empty \\chu{} tags while preserving non-empty \\chu{...} tags."""
+    tex_text = _safe_text(tex_text)
+    return RE_EMPTY_CHU.sub("", tex_text)
+    
+# ---------------------------------------------------------------------------
+# Pass 7 — Remove/normalise simple formatting artefacts
+# ---------------------------------------------------------------------------
+
+def pass7_formatting_cleanup(tex_text: Any) -> str:
+    """Normalise simple formatting artifacts.
+
+    \\% -> %
+    --  -> -
+    <i> and </i> -> removed
+    """
+    tex_text = _safe_text(tex_text)
+
+    tex_text = tex_text.replace(r"\%", "%")
+    tex_text = tex_text.replace("--", "-")
+    tex_text = tex_text.replace("<i>", "")
+    tex_text = tex_text.replace("</i>", "")
+
+    return tex_text
 # ---------------------------------------------------------------------------
 # Medium name cleaning
 # ---------------------------------------------------------------------------
@@ -374,8 +402,8 @@ def clean_medium_name(name: Any) -> Any:
         return name
 
     return RE_HTML_ENTITY.sub(lambda m: chr(int(m.group(1))), name)
-
-
+    
+    
 # ---------------------------------------------------------------------------
 # Pipeline
 # ---------------------------------------------------------------------------
@@ -400,6 +428,8 @@ PIPELINE = [
     pass4_amount_without_unit,
     pass4_prefix_braces, #newly added 
     pass5_plain_references,
+    pass6_remove_empty_chu, #newly added 2
+    pass7_formatting_cleanup, #newly added 3
 ]
 
 
