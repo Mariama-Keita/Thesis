@@ -66,6 +66,10 @@ RE_PLAIN_REFERENCE = re.compile(
 )
 
 RE_HTML_ENTITY = re.compile(r"&#(\d+);")
+RE_HTML_TAG = re.compile(r"</?[a-zA-Z][^>]*>")
+
+RE_TEXT_OUTSIDE_BRACES = re.compile(r"(\\chu)\{\}(\S[^\n]*)")
+
 
 
 
@@ -133,6 +137,18 @@ def pass1_sfi(tex_text: Any) -> str:
         out.append(line)
     return "\n".join(out)
 
+def pass1_html_tags(tex_text: Any) -> str:
+    """Strip HTML markup tags.
+
+    Medium 1303 uses `<i>...</i>` for italics where the rest of the dataset
+    uses `{\\sfi ...}` — the same mixed-provenance signal as the HTML entities
+    handled in pass3. The tags carry no meaning for parsing, and left in place
+    they would break the match between a sub-recipe heading and the
+    `\\mono{... (see below)}` line that references it.
+    """
+    tex_text = _safe_text(tex_text)
+    return RE_HTML_TAG.sub("", tex_text)
+
 # ---------------------------------------------------------------------------
 # Pass 2 — brace normalisation
 # ---------------------------------------------------------------------------
@@ -150,25 +166,6 @@ def pass2_double_curly_unbalanced(tex_text: Any) -> str:
             line = line.replace("{{", "{")
         out.append(line)
     return "\n".join(out)
-
-# def pass2_sfi_remnant(tex_text: Any) -> str:
-#     r"""Repair the `{{X}` fragment left when `\sfi` is stripped from `{{\sfi X}`.
-
-#     Removes both the doubled opening brace and its now-orphaned closing brace
-#     in a single substitution, so the brace balance is never transiently wrong.
-#     """
-#     tex_text = _safe_text(tex_text)
-#     return RE_SFI_REMNANT.sub(r"{\1", tex_text)
-
-
-# def pass2_double_curly(tex_text: Any) -> str:
-#     r"""Collapse `{{` left behind after `\sfi` removal.
-
-#     `\chu{{\sfi Solution A:}` becomes `\chu{{Solution A:}` after stripping
-#     `\sfi`, which must then become `\chu{Solution A:}`.
-#     """
-#     tex_text = _safe_text(tex_text)
-#     return RE_DOUBLE_CURLY.sub("{", tex_text)
 
 
 def pass2_concatenated_amounts(tex_text: Any) -> str:
@@ -230,6 +227,19 @@ def pass3_html_entities(tex_text: Any) -> str:
 # ---------------------------------------------------------------------------
 # Pass 4 — structural repairs to \mono lines
 # ---------------------------------------------------------------------------
+def pass4_text_outside_braces(tex_text: Any) -> str:
+    r"""Move text that was typed outside an empty `\chu{}` back inside it.
+
+    Medium 1004 has `\chu{}[Note]` where `\chu{[Note]}` was meant - the label
+    for the instruction on the following line. The parser reads only what is
+    inside the braces, so left as-is the label would be silently dropped.
+
+    Narrow by construction: only fires when `\chu{}` is immediately followed
+    by non-whitespace on the same line. Genuine empty spacers (`\chu{}` alone
+    on its line, 7 occurrences) are untouched.
+    """
+    tex_text = _safe_text(tex_text)
+    return RE_TEXT_OUTSIDE_BRACES.sub(r"\1{\2}", tex_text)
 
 def pass4_missing_unit_brace(tex_text: Any) -> str:
     r"""Add the closing brace to units that run into the next line.
@@ -253,19 +263,6 @@ def pass4_multiline_name(tex_text: Any) -> str:
     r"""Join component names that were wrapped across two lines."""
     tex_text = _safe_text(tex_text)
     return RE_MULTILINE_NAME.sub(r"\1 \2", tex_text)
-
-
-# def pass4_early_closing_brace(tex_text: Any) -> str:
-#     r"""Repair names whose brace closed too early after `\sfi` removal.
-
-#     `\mono{{\sfi p}-Aminobenzoic acid}` collapses to `\mono{p}-Aminobenzoic
-#     acid}`, where the first `}` is wrong. Both hyphen positions are handled:
-#     `\mono{p}-Amino...` and `\mono{p-}Amino...`.
-#     """
-#     tex_text = _safe_text(tex_text)
-#     tex_text = RE_EARLY_BRACE_HYPHEN_A.sub(r"\1\2-\3", tex_text)
-#     tex_text = RE_EARLY_BRACE_HYPHEN_B.sub(r"\1\2", tex_text)
-#     return tex_text
 
 
 def pass4_missing_name_brace(tex_text: Any) -> str:
@@ -346,7 +343,6 @@ def pass5_plain_references(tex_text: Any) -> str:
 
     return tex_text
 
-
 # ---------------------------------------------------------------------------
 # Medium name cleaning
 # ---------------------------------------------------------------------------
@@ -371,16 +367,15 @@ def clean_medium_name(name: Any) -> Any:
 PIPELINE = [
     pass1_formatting_tags,
     pass1_sfi,
+    pass1_html_tags,
     pass2_double_curly_unbalanced,
-    #pass2_sfi_remnant,
-    #pass2_double_curly,
     pass2_concatenated_amounts,
     pass3_units,
     pass3_html_entities,
+    pass4_text_outside_braces,  
     pass4_missing_unit_brace,
     pass4_corrupted_v,
     pass4_multiline_name,
-    #pass4_early_closing_brace,
     pass4_missing_name_brace,
     pass4_stray_text_after_name,
     pass4_brace_and_amount_repairs,
