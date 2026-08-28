@@ -70,7 +70,7 @@ RE_HTML_TAG = re.compile(r"</?[a-zA-Z][^>]*>")
 
 RE_TEXT_OUTSIDE_BRACES = re.compile(r"(\\chu)\{\}(\S[^\n]*)")
 
-
+RE_MONO_RUN_ON = re.compile(r"(\})(\\mono\{)")
 
 
 # ---------------------------------------------------------------------------
@@ -324,6 +324,16 @@ def pass4_amount_without_unit(tex_text: Any, default_unit: str = "g") -> str:
     return RE_AMOUNT_NO_UNIT.sub(r"\1{" + default_unit + "}", tex_text)
 
 
+def pass4_mono_run_on(tex_text: Any) -> str:
+    r"""Split two \mono declarations sharing a line.
+
+    Seven lines in the source close one component and open the next with no
+    newline between: `\mono{KH2PO4} {0.2}{g}\mono{NH4Cl} {0.25}{g}`.
+    split_mono reads only the first, so the second component would be lost.
+    """
+    tex_text = _safe_text(tex_text)
+    return RE_MONO_RUN_ON.sub(r"\1\n\2", tex_text)
+
 # ---------------------------------------------------------------------------
 # Pass 5 — plain references
 # ---------------------------------------------------------------------------
@@ -381,6 +391,7 @@ PIPELINE = [
     pass4_brace_and_amount_repairs,
     pass4_broken_mono_tag,
     pass4_amount_without_unit,
+    pass4_mono_run_on,
     pass5_plain_references,
 ]
 
